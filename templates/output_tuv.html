@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TÜV Audit-Prep Pack | CATL Mapping Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo-area">
+                <h1>四层映射引擎 <span class="badge">HKU Research Prototype</span></h1>
+            </div>
+            <nav class="main-nav">
+                <a href="/">首页 Overview</a>
+                <a href="/intake">数据工作台 Intake</a>
+                <a href="/outputs" class="active">输出中心 Outputs</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-tools">
+            <div>
+                <h2>TÜV Audit-Prep Pack</h2>
+                <p class="subtitle">Session: <span id="session-id">{{ session_id }}</span></p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="app.refreshTUV()">Refresh</button>
+                <button class="btn btn-secondary" onclick="app.exportSingle('tuv')">Export TUV Pack (ZIP)</button>
+                <a href="/outputs" class="btn btn-secondary">Back to Outputs</a>
+            </div>
+        </div>
+
+        <div class="alert warning" style="margin-top:20px;">
+            <strong>重要边界声明：</strong> 本页面是"TÜV 审计准备视图"（Audit-Prep View），
+            旨在帮助 CATL 整理证据链、准备与 NB / CAB 的审计对话。
+            <strong>这不是</strong> TÜV 正式审计报告，
+            <strong>不能替代</strong> TÜV / NB / CAB 的法定签字流程。
+        </div>
+
+        <!-- Audit Manifest Summary -->
+        <div class="summary-cards" style="display:flex;gap:20px;margin:25px 0;flex-wrap:wrap;">
+            <div class="summary-card">
+                <div class="sc-label">证据链字段</div>
+                <div class="sc-value" id="stat-tuv-evidence">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="sc-label">核验链字段</div>
+                <div class="sc-value" id="stat-tuv-assurance">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="sc-label">权限链字段</div>
+                <div class="sc-value" id="stat-tuv-access">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="sc-label">已识别缺口</div>
+                <div class="sc-value" id="stat-tuv-gaps">—</div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tab-header">
+                <button class="tab-btn active" data-target="tuv-overview">审计总览</button>
+                <button class="tab-btn" data-target="tuv-evidence">证据映射</button>
+                <button class="tab-btn" data-target="tuv-assurance">核验映射</button>
+                <button class="tab-btn" data-target="tuv-access">权限映射</button>
+                <button class="tab-btn" data-target="tuv-gaps">缺口清单</button>
+                <button class="tab-btn" data-target="tuv-ledger">证据台账</button>
+                <button class="tab-btn" data-target="tuv-assumptions">假设与限制</button>
+            </div>
+
+            <div class="tab-content active" id="pane-tuv-overview">
+                <h3>审计准备总览</h3>
+                <p>本视图综合 EU Battery Regulation 和 CBAM 输出中的关键核验字段，
+                供 NB / CAB 审计人员快速了解 CATL 产品合规准备状态。</p>
+                <div id="table-tuv-overview"></div>
+            </div>
+
+            <div class="tab-content" id="pane-tuv-evidence">
+                <h3>05_证据映射过程</h3>
+                <p>每个输出字段所需的证据清单，以及当前证据状态。</p>
+                <div id="table-tuv-evidence"></div>
+            </div>
+
+            <div class="tab-content" id="pane-tuv-assurance">
+                <h3>06_核验映射过程</h3>
+                <p>字段核验层级：从内部确认、第三方核验到合规复核的分层。</p>
+                <div id="table-tuv-assurance"></div>
+            </div>
+
+            <div class="tab-content" id="pane-tuv-access">
+                <h3>07_权限映射过程</h3>
+                <p>哪些数据可公开，哪些受限，哪些属于高敏感商业数据。</p>
+                <div id="table-tuv-access"></div>
+            </div>
+
+            <div class="tab-content" id="pane-tuv-gaps">
+                <h3>15_字段缺口与优先级</h3>
+                <p>当前 demo 与企业真实落地之间的差距清单，建议优先处理 P1 级缺口。</p>
+                <div id="table-tuv-gaps"></div>
+            </div>
+
+            <div class="tab-content" id="pane-tuv-ledger">
+                <h3>13_证据台账</h3>
+                <p>证据文件索引与版本状态台账。</p>
+                <div id="table-tuv-ledger"></div>
+            </div>
+
+            <div class="tab-content" id="pane-tuv-assumptions">
+                <h3>16_假设与限制 &amp; 17_责任链与版本</h3>
+                <p>当前版本的假设条件、系统限制与责任链条。</p>
+                <div id="table-tuv-assumptions"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 HKU-CATL Joint Lab Project. Research Prototype Only. Not a legal submission. Not a TÜV audit report.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        const SESSION_ID = "{{ session_id }}";
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".tab-btn").forEach(btn => {
+                btn.addEventListener("click", e => {
+                    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+                    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+                    e.target.classList.add("active");
+                    document.getElementById("pane-" + e.target.dataset.target).classList.add("active");
+                });
+            });
+            app.loadTUVOutput(SESSION_ID);
+
+            // Load TÜV summary stats
+            fetch(`/api/session/${SESSION_ID}/output_summary`)
+                .then(r => r.json())
+                .then(json => {
+                    if (json.status !== 'success') return;
+                    const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val || '—'; };
+                    set('stat-tuv-evidence',   json.evidence_count   || 0);
+                    set('stat-tuv-assurance', json.assurance_count || 0);
+                    set('stat-tuv-access',     json.access_count     || 0);
+                    set('stat-tuv-gaps',        json.gaps_count        || 0);
+                })
+                .catch(() => {});
+        });
+    </script>
+</body>
+</html>

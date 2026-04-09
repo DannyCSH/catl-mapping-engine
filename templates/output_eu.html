@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EU Battery Regulation Pack | CATL Mapping Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo-area">
+                <h1>四层映射引擎 <span class="badge">HKU Research Prototype</span></h1>
+            </div>
+            <nav class="main-nav">
+                <a href="/">首页 Overview</a>
+                <a href="/intake">数据工作台 Intake</a>
+                <a href="/outputs" class="active">输出中心 Outputs</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="page-tools">
+            <div>
+                <h2>EU Battery Regulation Pack</h2>
+                <p class="subtitle">Session: <span id="session-id">{{ session_id }}</span></p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="app.refreshEU()">Refresh</button>
+                <button class="btn btn-secondary" onclick="app.exportSingle('eu')">Export EU Pack (ZIP)</button>
+                <a href="/outputs" class="btn btn-secondary">Back to Outputs</a>
+            </div>
+        </div>
+
+        <div class="alert warning" style="margin-top:20px;">
+            <strong>边界声明：</strong> 本页面展示的是 EU Battery Regulation (2023/1542) 格式兼容输出，
+            基于 Article 7 与 Annex II 计算逻辑。本系统为研究原型，不构成法定电池护照申报。
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards" id="summary-cards" style="display:flex;gap:20px;margin:25px 0;flex-wrap:wrap;">
+            <div class="summary-card">
+                <div class="sc-label">输出字段总数</div>
+                <div class="sc-value" id="stat-eu-total">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="sc-label">证据齐备</div>
+                <div class="sc-value" id="stat-eu-evidence-ok">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="sc-label">待补证据</div>
+                <div class="sc-value" id="stat-eu-evidence-missing">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="sc-label">综合完备度</div>
+                <div class="sc-value" id="stat-eu-completeness">—</div>
+            </div>
+        </div>
+
+        <!-- Tab sections for EU output -->
+        <div class="tabs-container">
+            <div class="tab-header">
+                <button class="tab-btn active" data-target="eu-main">EU 输出表</button>
+                <button class="tab-btn" data-target="eu-evidence">证据映射</button>
+                <button class="tab-btn" data-target="eu-assurance">核验映射</button>
+                <button class="tab-btn" data-target="eu-access">权限映射</button>
+                <button class="tab-btn" data-target="eu-gaps">缺口与限制</button>
+            </div>
+
+            <div class="tab-content active" id="pane-eu-main">
+                <h3>02_欧盟电池法输出</h3>
+                <div id="table-eu-main"></div>
+            </div>
+
+            <div class="tab-content" id="pane-eu-evidence">
+                <h3>05_证据映射过程</h3>
+                <div id="table-eu-evidence"></div>
+            </div>
+
+            <div class="tab-content" id="pane-eu-assurance">
+                <h3>06_核验映射过程</h3>
+                <div id="table-eu-assurance"></div>
+            </div>
+
+            <div class="tab-content" id="pane-eu-access">
+                <h3>07_权限映射过程</h3>
+                <div id="table-eu-access"></div>
+            </div>
+
+            <div class="tab-content" id="pane-eu-gaps">
+                <h3>15_字段缺口与优先级 &amp; 16_假设与限制</h3>
+                <div id="table-eu-gaps"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 HKU-CATL Joint Lab Project. Research Prototype Only. Not a legal submission.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        const SESSION_ID = "{{ session_id }}";
+        document.addEventListener("DOMContentLoaded", () => {
+            // Tab switching
+            document.querySelectorAll(".tab-btn").forEach(btn => {
+                btn.addEventListener("click", e => {
+                    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+                    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+                    e.target.classList.add("active");
+                    document.getElementById("pane-" + e.target.dataset.target).classList.add("active");
+                });
+            });
+
+            app.loadEUOutput(SESSION_ID);
+            app.loadSummaryStats(SESSION_ID);
+        });
+    </script>
+</body>
+</html>
