@@ -11,7 +11,23 @@ from datetime import datetime
 # ============================================================
 # 路径配置
 # ============================================================
-CSV_VALUES_DIR = r"D:\VibeCoding\codex\reports\hku_catl_standards_mapping\review_csv_generic_template_v1_values"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LEGACY_REPORTS_DIR = r"D:\VibeCoding\codex\reports\hku_catl_standards_mapping"
+
+
+def _resolve_csv_dir():
+    candidates = [
+        os.path.join(BASE_DIR, "review_csv_generic_template_v1_values"),
+        os.path.join(BASE_DIR, "data", "review_csv_generic_template_v1_values"),
+        os.path.join(LEGACY_REPORTS_DIR, "review_csv_generic_template_v1_values"),
+    ]
+    for candidate in candidates:
+        if os.path.isdir(candidate):
+            return candidate
+    return candidates[0]
+
+
+CSV_VALUES_DIR = _resolve_csv_dir()
 
 
 # ============================================================

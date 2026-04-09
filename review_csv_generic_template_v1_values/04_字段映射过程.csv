@@ -1,0 +1,16 @@
+﻿字段映射：从 CATL 输入到 EU / CBAM 输出,,,,,,,
+,,,,,,,
+映射层,目标字段,输入字段代码,输入当前值,目标制度,转换方式,转换后结果预览,是否关键
+字段映射,制造商名称,manufacturer_name,CATL,EU,直接映射,CATL,是
+字段映射,电池型号,model_code,GENERIC-BATTERY-MODEL-001,EU+CBAM,直接映射,GENERIC-BATTERY-MODEL-001,是
+字段映射,制造工厂代码,plant_code,CN-PLANT-TEMPLATE-001,EU+CBAM,直接映射,CN-PLANT-TEMPLATE-001,是
+字段映射,报告期,reporting_period,2026Q1,EU+CBAM,公司周期转产品周期,2026Q1,是
+字段映射,声明总碳足迹(kgCO2e/kWh),pack_capacity_kwh,60,EU,生命周期计算后输出,48.97163120567376,是
+字段映射,原材料阶段(kgCO2e/kWh),cathode_mass_kg,140,EU,材料质量 x 材料因子,44.23611111111111,是
+字段映射,制造阶段(kgCO2e/kWh),grid_electricity_kwh,450,EU,能耗 + 工艺排放 + 良率调整,4.360520094562649,是
+字段映射,再生锂占比,recycled_lithium_pct,0.08,EU,直接映射,0.08,是
+字段映射,供应链追溯覆盖率,supplier_traceability_coverage_pct,0.92,EU,直接映射,0.92,是
+字段映射,铝材总嵌入排放(kgCO2e/申报单元),aluminium_mass_kg,80,CBAM,铝材质量 x (直接+间接因子),1120,是
+字段映射,钢材总嵌入排放(kgCO2e/申报单元),steel_mass_kg,30,CBAM,钢材质量 x (直接+间接因子),81,是
+字段映射,覆盖材料总嵌入排放(kgCO2e/申报单元),supplier_pcf_coverage_pct,0.76,CBAM,铝材 + 钢材汇总,1201,是
+字段映射,分层访问矩阵,access_matrix_status,齐备,EU+CBAM,控制结果可见范围,齐备,是

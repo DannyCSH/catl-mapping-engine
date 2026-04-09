@@ -35,10 +35,26 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RUNTIME_DIR = os.path.join(BASE_DIR, 'runtime')
 EXPORTS_DIR = os.path.join(BASE_DIR, 'exports')
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
+LEGACY_REPORTS_DIR = r"D:\VibeCoding\codex\reports\hku_catl_standards_mapping"
 
-TEMPLATE_XLSX = r"D:\VibeCoding\codex\reports\hku_catl_standards_mapping\catl_four_layer_mapping_engine_generic_template_2026-04-07.xlsx"
-SHENXING_XLSX = r"D:\VibeCoding\codex\reports\hku_catl_standards_mapping\catl_four_layer_mapping_engine_shenxing_case_snapshot_2026-04-07.xlsx"
-CSV_VALUES_DIR = r"D:\VibeCoding\codex\reports\hku_catl_standards_mapping\review_csv_generic_template_v1_values"
+
+def resolve_asset(*relative_parts):
+    """Prefer repo-local assets, but keep the old Windows workspace path as fallback."""
+    candidates = [
+        os.path.join(BASE_DIR, *relative_parts),
+        os.path.join(BASE_DIR, "data", *relative_parts),
+        os.path.join(LEGACY_REPORTS_DIR, *relative_parts),
+    ]
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return candidate
+    return candidates[0]
+
+
+TEMPLATE_XLSX = resolve_asset("catl_four_layer_mapping_engine_generic_template_2026-04-07.xlsx")
+SHENXING_XLSX = resolve_asset("catl_four_layer_mapping_engine_shenxing_case_snapshot_2026-04-07.xlsx")
+CSV_VALUES_DIR = resolve_asset("review_csv_generic_template_v1_values")
+COORDINATION_LOG_PATH = os.path.join(LOG_DIR, "frontend_project_coordination_log.jsonl")
 
 os.makedirs(RUNTIME_DIR, exist_ok=True)
 os.makedirs(EXPORTS_DIR, exist_ok=True)
@@ -47,7 +63,6 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 def log_event(event_type, message, session_id=None):
     """Append a JSON line to the project coordination log."""
-    log_path = r"D:\VibeCoding\codex\reports\hku_catl_standards_mapping\frontend_project_coordination_log_2026-04-08.jsonl"
     entry = {
         "timestamp": datetime.now().isoformat() + "+08:00",
         "type": event_type,
@@ -57,7 +72,7 @@ def log_event(event_type, message, session_id=None):
     if session_id:
         entry["session_id"] = session_id
     try:
-        with open(log_path, "a", encoding="utf-8") as f:
+        with open(COORDINATION_LOG_PATH, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     except Exception:
         pass
@@ -682,6 +697,8 @@ def health():
 
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", "5000"))
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
     print("=" * 60)
     print("CATL Four-Layer Mapping Engine - Product Site v2")
     print("=" * 60)
@@ -692,6 +709,6 @@ if __name__ == "__main__":
     print(f"Runtime dir:  {RUNTIME_DIR}")
     print(f"Exports dir:  {EXPORTS_DIR}")
     print("=" * 60)
-    print("Starting Flask on http://127.0.0.1:5000")
+    print(f"Starting Flask on http://127.0.0.1:{port}")
     print("=" * 60)
-    app.run(debug=True, port=5000, host="0.0.0.0")
+    app.run(debug=debug, port=port, host="0.0.0.0")
