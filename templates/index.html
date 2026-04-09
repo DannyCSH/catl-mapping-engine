@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CATL 四层映射引擎 | HKU Research Prototype</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo-area">
+                <h1>四层映射引擎 <span class="badge">HKU × CATL Research Prototype</span></h1>
+            </div>
+            <nav class="main-nav">
+                <a href="/" class="active">首页 Overview</a>
+                <a href="/intake">数据工作台 Intake</a>
+                <a href="/outputs">输出中心 Outputs</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- ====================================================
+             HERO
+             ==================================================== -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h2>中欧碳核算口径转换系统</h2>
+                <p>
+                    这是一套将宁德时代内部电池数据，映射为符合欧盟《电池法》
+                    (Battery Regulation 2023/1542) 与 CBAM 口径要求的结构化输出的研究原型系统。
+                    它不是法定申报平台，不替代 TÜV / NB / CAB 的正式审计签字链路。
+                </p>
+                <div class="alert warning" style="margin-bottom:0;">
+                    <strong>合规边界声明：</strong>
+                    本系统用于"输入组织 + 计算重算 + 输出整包 + 审计准备"，
+                    属于研究原型，任何输出均不构成法定合规声明。
+                </div>
+                <div class="cta-group" style="margin-top:30px;">
+                    <a href="/intake" class="btn btn-primary">Start Data Intake →</a>
+                    <a href="/outputs" class="btn btn-secondary">Explore Output Packs</a>
+                </div>
+            </div>
+            <div class="hero-graphic">
+                <div class="mapping-box field">1 · 字段映射<br><small>CATL → EU / CBAM 字段口径转换</small></div>
+                <div class="mapping-box evidence">2 · 证据映射<br><small>每个输出字段需要什么证据支撑</small></div>
+                <div class="mapping-box assurance">3 · 核验映射<br><small>内部确认 / 第三方核验 / 合规复核</small></div>
+                <div class="mapping-box access">4 · 权限映射<br><small>公开 · 受限 · 高敏感 · 分层访问</small></div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             SYSTEM STORY
+             ==================================================== -->
+        <section class="system-story">
+            <h3>系统解决了什么问题</h3>
+            <p>
+                中国新能源电池企业面对欧盟市场时，最大的合规挑战不是"有没有数据"，
+                而是"中国口径"与"欧盟要求"之间的结构性差异：
+                从公司级披露到产品+工厂级申报、从重量单位到碳强度因子、从内部确认到第三方核验链路。
+            </p>
+            <p>
+                本系统以 CATL 为锚点，搭建了一座"方法论桥梁"，把已经在中国语境中运转的数据，
+                重新组装成欧盟《电池法》和 CBAM 兼容的结构。
+            </p>
+            <div class="four-layer-grid">
+                <div class="layer-item">
+                    <h4>字段映射</h4>
+                    <p>CATL 内部字段 → EU Battery Regulation / CBAM 格式字段</p>
+                </div>
+                <div class="layer-item">
+                    <h4>证据映射</h4>
+                    <p>每个输出字段 → 所需证据类型与当前完备状态</p>
+                </div>
+                <div class="layer-item">
+                    <h4>核验映射</h4>
+                    <p>内部 / 供应商 / 第三方 → 合规复核的分层核验链</p>
+                </div>
+                <div class="layer-item">
+                    <h4>权限映射</h4>
+                    <p>公开 / 受限 / 高敏感 → 按角色分层访问矩阵</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             PRODUCT FEATURES
+             ==================================================== -->
+        <section class="cards-section">
+            <div class="card">
+                <h3>⚡ EU Battery Regulation Pack</h3>
+                <p>
+                    基于 Article 7 与 Annex II，在"特定型号 + 特定工厂"层级下输出完整生命周期碳足迹宣告，
+                    包含再生材料比例、尽调政策链接与供应链追溯覆盖率。
+                </p>
+            </div>
+            <div class="card">
+                <h3>🔗 CBAM Integrated Pack</h3>
+                <p>
+                    电池上游供应链（铝材 / 钢材）的 CBAM 影子口径嵌入排放追踪，
+                    包含供应商安装点 ID、直接 / 间接排放因子与核验状态。
+                </p>
+            </div>
+            <div class="card">
+                <h3>📋 TÜV Audit-Prep Pack</h3>
+                <p>
+                    帮助 CATL 在正式审计前向 NB / CAB 展示"证据链完备度"的工作视图。
+                    不构成 TÜV 正式报告，不可替代法定审计签字。
+                </p>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             HOW IT WORKS
+             ==================================================== -->
+        <section style="margin: 60px 0;">
+            <h3 style="font-family:'Noto Serif SC',serif;color:var(--accent-dark);margin-bottom:30px;">
+                工作流程
+            </h3>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:15px;">
+                <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:25px 20px;text-align:center;">
+                    <div style="font-size:2rem;margin-bottom:10px;">1️⃣</div>
+                    <strong>选择模板</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin:8px 0 0;">
+                        通用模板 或<br>神行案例快照
+                    </p>
+                </div>
+                <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:25px 20px;text-align:center;">
+                    <div style="font-size:2rem;margin-bottom:10px;">2️⃣</div>
+                    <strong>填写数据</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin:8px 0 0;">
+                        86+ 个字段<br>按分类分组填写
+                    </p>
+                </div>
+                <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:25px 20px;text-align:center;">
+                    <div style="font-size:2rem;margin-bottom:10px;">3️⃣</div>
+                    <strong>触发计算</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin:8px 0 0;">
+                        数据交叉验证<br>多维度映射推理
+                    </p>
+                </div>
+                <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:25px 20px;text-align:center;">
+                    <div style="font-size:2rem;margin-bottom:10px;">4️⃣</div>
+                    <strong>查看输出</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin:8px 0 0;">
+                        EU / CBAM / TÜV<br>三个输出包
+                    </p>
+                </div>
+                <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:25px 20px;text-align:center;">
+                    <div style="font-size:2rem;margin-bottom:10px;">5️⃣</div>
+                    <strong>导出整包</strong>
+                    <p style="font-size:0.82rem;color:var(--text-secondary);margin:8px 0 0;">
+                        ZIP 含 CSV<br>+ manifest + README
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             BOUNDARY STATEMENT
+             ==================================================== -->
+        <section style="background:#f7fafc;border:1px solid #e2e8f0;border-radius:8px;padding:35px;margin:40px 0;">
+            <h3 style="color:var(--accent-dark);margin-bottom:20px;">边界声明 · 诚实面对系统局限</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:25px;">
+                <div>
+                    <h4 style="color:var(--text-primary);margin-bottom:10px;">✅ 本系统可以做到</h4>
+                    <ul style="color:var(--text-secondary);font-size:0.9rem;line-height:1.8;padding-left:20px;">
+                        <li>把 CATL 中国口径数据重组为 EU Battery Regulation 兼容格式</li>
+                        <li>生成 CBAM 影子口径的上游供应链追溯输出</li>
+                        <li>组织证据链、映射核验层级、分层权限访问</li>
+                        <li>通过 Excel COM 执行完整的四层映射重算</li>
+                        <li>导出 EU / CBAM / TÜV 审计准备包（ZIP + CSV）</li>
+                        <li>展示当前缺口与下一步里程碑</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color:var(--text-primary);margin-bottom:10px;">❌ 本系统不能声称</h4>
+                    <ul style="color:var(--text-secondary);font-size:0.9rem;line-height:1.8;padding-left:20px;">
+                        <li>已接入真实 Tractus-X / Catena-X 连接器</li>
+                        <li>已接入企业真实数据库或 ERP/MES 系统</li>
+                        <li>已替代 TÜV / NB / CAB 的法定审计签字</li>
+                        <li>HKU / CATL 已具备正式审计签字方资质</li>
+                        <li>是法定 CBAM 或 EU Battery Regulation 报送平台</li>
+                        <li>数据可以直接用于对欧正式申报</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             CTA BAND
+             ==================================================== -->
+        <section style="background:linear-gradient(135deg,#2c5282,#3182ce);border-radius:10px;padding:50px 40px;margin:60px 0;text-align:center;color:white;">
+            <h2 style="margin-bottom:15px;font-family:'Noto Serif SC',serif;">准备好开始了吗？</h2>
+            <p style="margin-bottom:30px;opacity:0.9;">
+                选择"通用模板"快速开始，或使用"神行案例"查看完整演示模式。
+            </p>
+            <div style="display:flex;gap:15px;justify-content:center;flex-wrap:wrap;">
+                <a href="/intake" class="btn btn-primary">
+                    Start Data Intake →
+                </a>
+                <a href="/outputs" class="btn" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.4);color:white;">
+                    Browse Output Packs
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>
+                © 2026 HKU-CATL Joint Lab Project · Research Prototype Only · Not a Legal Submission
+            </p>
+            <p style="margin-top:8px;font-size:0.78rem;color:var(--text-muted);">
+                技术栈：Python Flask + Vanilla HTML/JS + Excel COM · 所有运行时数据保存在本地 D 盘项目目录
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

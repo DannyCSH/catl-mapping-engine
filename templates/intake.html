@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Intake Workspace | CATL Four-Layer Mapping Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo-area">
+                <h1>四层映射引擎 <span class="badge">HKU Research Prototype</span></h1>
+            </div>
+            <nav class="main-nav">
+                <a href="/">首页 Overview</a>
+                <a href="/intake" class="active">数据工作台 Intake</a>
+                <a href="/outputs">输出中心 Outputs</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Session Controls -->
+        <div class="page-tools">
+            <div>
+                <h2>数据填写工作台</h2>
+                <p class="subtitle">Session: <span id="current-session-id">None</span></p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="app.createSession('generic')">
+                    Load Generic Template
+                </button>
+                <button class="btn btn-secondary" onclick="app.createSession('shenxing')">
+                    Load Shenxing Case Demo
+                </button>
+                <button class="btn btn-secondary" onclick="app.openAISettings()">🤖 AI Settings</button>
+                <button class="btn btn-secondary" onclick="app.openAIFileParse()" id="btn-ai-parse" disabled>📎 AI Parse Files</button>
+                <button class="btn btn-primary" onclick="app.calculateSession()" id="btn-calculate" disabled>
+                    Calculate / Generate Outputs
+                </button>
+            </div>
+        </div>
+
+
+        <div class="alert warning" style="margin-top:15px;">
+            <strong>填写说明：</strong>
+            选择一个模板模式（通用模板或神行案例）开始填写。
+            所有修改会自动保存为草稿。
+            填写完成后，点击 <strong>Calculate / Generate Outputs</strong> 触发 Excel 重算并生成输出包。
+            <br><br>
+            <strong>边界声明：</strong> 本系统为研究原型，不构成法定电池护照申报，不替代 TÜV / NB / CAB 正式审计。
+        </div>
+
+        <!-- Intake Form -->
+        <div class="intake-container">
+            <aside class="intake-sidebar" id="intake-sidebar">
+                <div style="padding:15px 18px;background:#f7fafc;border-radius:8px 8px 0 0;border:1px solid #e2e8f0;border-bottom:none;">
+                    <strong style="font-size:0.85rem;color:var(--text-secondary);">字段分类</strong>
+                </div>
+                <!-- Group nav injected by JS -->
+            </aside>
+
+            <section class="intake-form" id="intake-form">
+                <!-- Form injected by JS -->
+                <div class="empty-state" style="padding:60px;">
+                    <p>点击上方按钮加载模板数据后，表单将显示在此处。</p>
+                    <p style="color:var(--text-muted);font-size:0.85rem;">
+                        Generic Template — 通用结构，适合任何 CATL 电池产品<br>
+                        Shenxing Case — 神行案例快照，展示赛事叙事模式
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Bottom action bar -->
+        <div style="position:sticky;bottom:0;background:white;border-top:1px solid #e2e8f0;padding:15px 0;margin-top:40px;display:flex;justify-content:space-between;align-items:center;z-index:50;" id="bottom-bar" hidden>
+            <span style="color:var(--text-secondary);font-size:0.85rem;" id="save-status">Auto-saved</span>
+            <div style="display:flex;gap:10px;">
+                <button class="btn btn-secondary" onclick="app.saveDraft()">Save Draft</button>
+                <button class="btn btn-secondary" onclick="app.runAIComplianceCheck()" id="btn-ai-check" disabled>🛡️ AI 合规预检</button>
+                <button class="btn btn-primary" onclick="app.calculateSession()">Calculate &amp; Generate Outputs →</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- AI Settings Modal -->
+    <div id="modal-ai-settings" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;padding:30px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3>🤖 AI Provider Settings</h3>
+                <button onclick="app.closeAISettings()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
+            <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:20px;">
+                配置你想要使用的 AI API密钥。密钥仅存储在本地，不会发送到非目标服务商的任何地方。
+            </p>
+            <div id="ai-keys-list"></div>
+            <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;">
+                <button class="btn btn-secondary" onclick="app.closeAISettings()">Cancel</button>
+                <button class="btn btn-primary" onclick="app.saveAIKeys()">Save Keys</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI File Parse Modal -->
+    <div id="modal-ai-parse" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;padding:30px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3>📎 AI Batch File Parse</h3>
+                <button onclick="app.closeAIFileParse()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="font-size:0.85rem;color:var(--text-secondary);">Provider & Model:</label>
+                <div style="display:flex;gap:10px;margin-top:5px;">
+                    <select id="parse-provider" style="flex:1;padding:8px;border:1px solid #e2e8f0;border-radius:6px;">
+                        <option value="openai">OpenAI (GPT-4o)</option>
+                        <option value="anthropic">Anthropic (Claude)</option>
+                        <option value="minimax">Minimax</option>
+                        <option value="zhipu">Zhipu GLM</option>
+                        <option value="qwen">Qwen</option>
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="gemini">Gemini</option>
+                    </select>
+                    <input id="parse-model" type="text" placeholder="Model (e.g. gpt-4o)" value="gpt-4o" style="flex:1;padding:8px;border:1px solid #e2e8f0;border-radius:6px;" />
+                </div>
+            </div>
+            <div style="border:2px dashed #e2e8f0;border-radius:8px;padding:30px;text-align:center;margin-bottom:15px;" id="parse-dropzone">
+                <input type="file" id="parse-files" multiple accept=".pdf,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.txt" style="display:none;" onchange="app.handleParseFilesSelect(this.files)" />
+                <p style="color:var(--text-secondary);">Drag & drop files here, or <a href="#" onclick="document.getElementById('parse-files').click();return false;" style="color:var(--accent);">browse</a></p>
+                <p style="color:var(--text-muted);font-size:0.8rem;margin-top:5px;">PDF · Excel · CSV · 图片 · TXT</p>
+                <div id="parse-file-list" style="margin-top:10px;text-align:left;"></div>
+            </div>
+            <div id="parse-preview" style="display:none;margin-bottom:15px;">
+                <h4>Extracted Data (Preview)</h4>
+                <div id="parse-preview-content" style="font-size:0.85rem;max-height:200px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:6px;padding:10px;"></div>
+            </div>
+            <div id="parse-status" style="font-size:0.85rem;margin-bottom:15px;display:none;"></div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;">
+                <button class="btn btn-secondary" onclick="app.closeAIFileParse()">Cancel</button>
+                <button class="btn btn-primary" onclick="app.runAIFileParse()" id="btn-run-parse" disabled>Parse with AI</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Compliance Check Modal -->
+    <div id="modal-ai-check" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:12px;padding:30px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3>🛡️ AI 合规预检</h3>
+                <button onclick="app.closeAIComplianceCheck()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
+            <div style="margin-bottom:15px;">
+                <label style="font-size:0.85rem;color:var(--text-secondary);">Provider & Model:</label>
+                <div style="display:flex;gap:10px;margin-top:5px;">
+                    <select id="check-provider" style="flex:1;padding:8px;border:1px solid #e2e8f0;border-radius:6px;">
+                        <option value="openai">OpenAI (GPT-4o)</option>
+                        <option value="anthropic">Anthropic (Claude)</option>
+                        <option value="minimax">Minimax</option>
+                        <option value="zhipu">Zhipu GLM</option>
+                        <option value="qwen">Qwen</option>
+                        <option value="deepseek">DeepSeek</option>
+                        <option value="gemini">Gemini</option>
+                    </select>
+                    <input id="check-model" type="text" placeholder="Model" value="gpt-4o" style="flex:1;padding:8px;border:1px solid #e2e8f0;border-radius:6px;" />
+                </div>
+            </div>
+            <div id="check-loading" style="text-align:center;padding:30px;color:var(--text-secondary);">
+                AI is analyzing your data...<br>
+                <span style="font-size:2rem;margin-top:10px;">⏳</span>
+            </div>
+            <div id="check-results" style="display:none;"></div>
+            <div style="margin-top:15px;display:flex;justify-content:flex-end;gap:10px;">
+                <button class="btn btn-secondary" onclick="app.closeAIComplianceCheck()">Close</button>
+                <button class="btn btn-primary" onclick="app.runAIComplianceCheckGo()" id="btn-run-check" disabled>Start Check</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 HKU-CATL Joint Lab Project. Research Prototype Only. Not a legal submission.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Only restore session from localStorage AFTER server validation
+            // (loadSessionDraft in loadIntakeSchema will validate and clear stale sessions)
+            app.loadIntakeSchema();
+        });
+    </script>
+</body>
+</html>
