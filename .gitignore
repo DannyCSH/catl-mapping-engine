@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+app.log
+runtime/
+exports/
+*.xlsx
+!catl_four_layer_mapping_engine_generic_template_2026-04-07.xlsx
+!catl_four_layer_mapping_engine_shenxing_case_snapshot_2026-04-07.xlsx
+.DS_Store

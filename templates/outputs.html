@@ -51,7 +51,7 @@
                 </ul>
                 <div class="card-footer">
                     <span id="eu-stat">-</span>
-                    <a href="#" class="btn btn-primary btn-sm" onclick="app.openEU()">Open EU Pack →</a>
+                    <button class="btn btn-primary btn-sm" id="btn-open-eu" disabled onclick="app.openEU()">Open EU Pack →</button>
                 </div>
             </div>
 
@@ -66,7 +66,7 @@
                 </ul>
                 <div class="card-footer">
                     <span id="cbam-stat">-</span>
-                    <a href="#" class="btn btn-primary btn-sm" onclick="app.openCBAM()">Open CBAM Pack →</a>
+                    <button class="btn btn-primary btn-sm" id="btn-open-cbam" disabled onclick="app.openCBAM()">Open CBAM Pack →</button>
                 </div>
             </div>
 
@@ -82,7 +82,7 @@
                 </ul>
                 <div class="card-footer">
                     <span id="tuv-stat">-</span>
-                    <a href="#" class="btn btn-primary btn-sm" onclick="app.openTUV()">Open TUV Pack →</a>
+                    <button class="btn btn-primary btn-sm" id="btn-open-tuv" disabled onclick="app.openTUV()">Open TUV Pack →</button>
                 </div>
             </div>
         </div>
@@ -142,12 +142,16 @@
             const el = document.getElementById('current-session-id');
             if (el) el.innerText = sessionId || 'No active session - showing static defaults';
 
-            // Enable/disable export all button based on session
+            // Enable/disable all session-based buttons
+            const hasSession = !!sessionId;
             const exportAllBtn = document.getElementById('btn-export-all');
-            if (exportAllBtn) exportAllBtn.disabled = !sessionId;
+            if (exportAllBtn) exportAllBtn.disabled = !hasSession;
+            ['btn-open-eu', 'btn-open-cbam', 'btn-open-tuv'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = !hasSession;
+            });
 
             // Load quick view data (use static fallback if no active session)
-            const hasSession = !!sessionId;
             app.loadOutputs('eu', !hasSession);
             app.loadOutputs('cbam', !hasSession);
         });

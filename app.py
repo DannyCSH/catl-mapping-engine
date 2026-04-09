@@ -32,14 +32,29 @@ app = Flask(__name__)
 # PATH CONFIG
 # ============================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, 'data')
 RUNTIME_DIR = os.path.join(BASE_DIR, 'runtime')
 EXPORTS_DIR = os.path.join(BASE_DIR, 'exports')
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
+LEGACY_REPORTS_DIR = r"D:\VibeCoding\codex\reports\hku_catl_standards_mapping"
 
-TEMPLATE_XLSX = os.path.join(DATA_DIR, 'generic_template.xlsx')
-SHENXING_XLSX = os.path.join(DATA_DIR, 'shenxing_case.xlsx')
-CSV_VALUES_DIR = os.path.join(DATA_DIR, 'csv_values')
+
+def resolve_asset(*relative_parts):
+    """Prefer repo-local assets, but keep the old Windows workspace path as fallback."""
+    candidates = [
+        os.path.join(BASE_DIR, *relative_parts),
+        os.path.join(BASE_DIR, "data", *relative_parts),
+        os.path.join(LEGACY_REPORTS_DIR, *relative_parts),
+    ]
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return candidate
+    return candidates[0]
+
+
+TEMPLATE_XLSX = resolve_asset("catl_four_layer_mapping_engine_generic_template_2026-04-07.xlsx")
+SHENXING_XLSX = resolve_asset("catl_four_layer_mapping_engine_shenxing_case_snapshot_2026-04-07.xlsx")
+CSV_VALUES_DIR = resolve_asset("review_csv_generic_template_v1_values")
+COORDINATION_LOG_PATH = os.path.join(LOG_DIR, "frontend_project_coordination_log.jsonl")
 
 os.makedirs(RUNTIME_DIR, exist_ok=True)
 os.makedirs(EXPORTS_DIR, exist_ok=True)
@@ -48,7 +63,6 @@ os.makedirs(LOG_DIR, exist_ok=True)
 
 def log_event(event_type, message, session_id=None):
     """Append a JSON line to the project coordination log."""
-    log_path = os.path.join(LOG_DIR, 'events.jsonl')
     entry = {
         "timestamp": datetime.now().isoformat() + "+08:00",
         "type": event_type,
@@ -58,7 +72,7 @@ def log_event(event_type, message, session_id=None):
     if session_id:
         entry["session_id"] = session_id
     try:
-        with open(log_path, "a", encoding="utf-8") as f:
+        with open(COORDINATION_LOG_PATH, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     except Exception:
         pass
@@ -82,349 +96,6 @@ def read_xlsx_sheet(xlsx_path, sheet_name, header=2):
         return df.fillna("")
     except Exception:
         return pd.DataFrame()
-
-
-# ============================================================
-# AI PROVIDER CONFIG
-# ============================================================
-# In-memory API key store. Keys are provider names, values are dicts with api_key and optional base_url.
-AI_PROVIDER_KEYS = {
-    "openai":      {"api_key": "", "base_url": "https://api.openai.com/v1"},
-    "anthropic":   {"api_key": "", "base_url": "https://api.anthropic.com"},
-    "minimax":     {"api_key": "", "base_url": "https://api.minimax.chat/v1"},
-    "zhipu":       {"api_key": "", "base_url": "https://open.bigmodel.cn/api/paas/v4"},
-    "qwen":        {"api_key": "", "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"},
-    "deepseek":    {"api_key": "", "base_url": "https://api.deepseek.com/v1"},
-    "gemini":      {"api_key": "", "base_url": "https://generativelanguage.googleapis.com/v1beta"},
-}
-
-AI_PROVIDER_KEYS_FILE = os.path.join(BASE_DIR, "ai_keys.json")
-
-
-def load_ai_keys():
-    """Load persisted API keys from disk."""
-    if os.path.exists(AI_PROVIDER_KEYS_FILE):
-        try:
-            with open(AI_PROVIDER_KEYS_FILE, encoding="utf-8") as f:
-                saved = json.load(f)
-            for k, v in saved.items():
-                if k in AI_PROVIDER_KEYS:
-                    AI_PROVIDER_KEYS[k]["api_key"] = v.get("api_key", "")
-                    AI_PROVIDER_KEYS[k]["base_url"] = v.get("base_url", AI_PROVIDER_KEYS[k]["base_url"])
-        except Exception:
-            pass
-
-
-def save_ai_keys():
-    """Persist API keys to disk."""
-    try:
-        with open(AI_PROVIDER_KEYS_FILE, "w", encoding="utf-8") as f:
-            json.dump(AI_PROVIDER_KEYS, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
-
-
-load_ai_keys()
-
-
-def _build_openai_messages(provider, system, user_content, image_data=None):
-    """Build provider-specific message payload for chat completion."""
-    if provider == "anthropic":
-        msgs = [{"role": "user", "content": [{"type": "text", "text": user_content}]}]
-        if image_data:
-            msgs[0]["content"].insert(0, {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": image_data}})
-        return msgs
-    elif provider in ("minimax", "qwen"):
-        msgs = [{"role": "system", "content": system}, {"role": "user", "content": user_content}]
-        return msgs
-    else:
-        content = user_content
-        if image_data:
-            content = [{"type": "text", "text": user_content}, {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image_data}"}}]
-        return [{"role": "system", "content": system}, {"role": "user", "content": content}]
-
-
-def _call_ai(provider, model, system, user_content, image_data=None, timeout=60):
-    """Unified AI chat completion across multiple providers."""
-    import urllib.request
-    import urllib.error
-
-    cfg = AI_PROVIDER_KEYS.get(provider, {})
-    api_key = cfg.get("api_key", "")
-    base_url = cfg.get("base_url", "")
-
-    if not api_key:
-        raise Exception(f"API key not configured for provider: {provider}")
-
-    messages = _build_openai_messages(provider, system, user_content, image_data)
-
-    if provider == "anthropic":
-        payload = {
-            "model": model,
-            "messages": messages,
-            "max_tokens": 4096,
-        }
-        headers = {
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
-        }
-        url = f"{base_url}/messages"
-    elif provider == "gemini":
-        payload = {
-            "contents": [{"parts": [{"text": user_content}]}],
-            "generationConfig": {"temperature": 0.1, "maxOutputTokens": 4096},
-        }
-        headers = {"content-type": "application/json", "x-goog-api-key": api_key}
-        url = f"{base_url}/models/{model}:generateContent"
-    elif provider == "minimax":
-        # Minimax requires group_id as URL param; API key as Bearer token
-        payload = {
-            "model": model,
-            "messages": messages,
-            "temperature": 0.1,
-        }
-        headers = {"Authorization": f"Bearer {api_key}", "content-type": "application/json"}
-        # group_id is the first segment of the API key (before the dot)
-        group_id = api_key.split(".")[0] if "." in api_key else api_key[:8]
-        url = f"{base_url}/text/chatcompletion_v2?group_id={group_id}"
-    else:
-        payload = {
-            "model": model,
-            "messages": messages,
-            "temperature": 0.1,
-            "max_tokens": 4096,
-        }
-        headers = {"Authorization": f"Bearer {api_key}", "content-type": "application/json"}
-        url = f"{base_url}/chat/completions"
-
-    data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        err_body = e.read().decode("utf-8", errors="replace")
-        raise Exception(f"AI API error ({e.code}): {err_body[:500]}")
-
-    if provider == "anthropic":
-        return result.get("content", [{}])[0].get("text", "")
-    elif provider == "gemini":
-        return result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-    else:
-        return result.get("choices", [{}])[0].get("message", {}).get("content", "")
-
-
-# ============================================================
-# FILE UPLOAD & AI PARSING
-# ============================================================
-@app.route("/api/ai/keys", methods=["GET", "POST"])
-def ai_keys():
-    """Get or update AI provider API keys."""
-    if request.method == "POST":
-        data = request.json or {}
-        for prov in AI_PROVIDER_KEYS:
-            if prov in data:
-                AI_PROVIDER_KEYS[prov]["api_key"] = str(data[prov].get("api_key", "")).strip()
-                AI_PROVIDER_KEYS[prov]["base_url"] = str(data[prov].get("base_url", AI_PROVIDER_KEYS[prov]["base_url"])).strip()
-        save_ai_keys()
-        return jsonify({"status": "success", "message": "Keys saved"})
-    else:
-        return jsonify({
-            "status": "success",
-            "providers": {
-                k: {"has_key": bool(v["api_key"]), "base_url": v["base_url"]}
-                for k, v in AI_PROVIDER_KEYS.items()
-            }
-        })
-
-
-@app.route("/api/ai/parse_files", methods=["POST"])
-def ai_parse_files():
-    """
-    Accept uploaded files + session_id + provider/model.
-    Returns parsed field values extracted from the files.
-    """
-    if "files" not in request.files and "file_urls" not in request.json:
-        return jsonify({"status": "error", "message": "No files provided"}), 400
-
-    data = request.json or {}
-    session_id = data.get("session_id")
-    provider = data.get("provider", "openai")
-    model = data.get("model", "gpt-4o")
-    field_schema = data.get("field_schema", {})  # {field_code: {label, note, exampleValue}}
-
-    if not session_id:
-        return jsonify({"status": "error", "message": "No session_id provided"}), 400
-    if provider not in AI_PROVIDER_KEYS:
-        return jsonify({"status": "error", "message": f"Unknown provider: {provider}"}), 400
-
-    # Build field schema description for the AI
-    schema_text = "字段说明如下（字段代码：标签 / 说明）：\n"
-    for fc, info in field_schema.items():
-        label = info.get("label", fc)
-        note = info.get("note", "")
-        example = info.get("exampleValue", "")
-        schema_text += f"- {fc}：{label}。说明：{note}。示例值：{example}\n"
-
-    system_prompt = (
-        "你是一个专业的欧盟电池法规数据提取助手。用户的文件中包含电池产品的技术参数和碳足迹相关数据。"
-        "你的任务是从上传的文件中提取字段值，并以JSON格式返回。"
-        "返回格式：{\"字段代码\": \"提取的值\", ...}。"
-        "只返回你确信能从文件中提取到的值，对于无法确定的字段不要返回。"
-        "所有值都应该是字符串格式。"
-    )
-
-    results = {}
-
-    # Process uploaded files
-    files = request.files.getlist("files") or []
-    for f in files:
-        fname = f.filename or "unknown"
-        ext = os.path.splitext(fname)[-1].lower()
-
-        if ext in (".png", ".jpg", ".jpeg", ".gif", ".webp"):
-            # Image: use base64 + vision-capable model
-            import base64
-            img_bytes = f.read()
-            img_b64 = base64.b64encode(img_bytes).decode("utf-8")
-            user_msg = (
-                f"请从这张图片中提取电池产品的参数数据。\n{schema_text}\n"
-                "只返回能从图片中明确看到的字段数据。"
-            )
-            try:
-                text = _call_ai(provider, model, system_prompt, user_msg, image_data=img_b64)
-                parsed = _extract_json_from_response(text)
-                results.update(parsed)
-            except Exception as e:
-                results[f"_error_{fname}"] = str(e)
-
-        elif ext in (".pdf", ".docx", ".txt", ".csv", ".xlsx", ".xls"):
-            # Text/Excel: read content and send as text
-            content = ""
-            try:
-                if ext == ".pdf":
-                    try:
-                        import pypdf
-                        reader = pypdf.PdfReader(f)
-                        for page in reader.pages:
-                            content += page.extract_text() or ""
-                    except ImportError:
-                        content = "[PDF解析需要安装 pypdf: pip install pypdf]"
-                elif ext in (".xlsx", ".xls"):
-                    import io
-                    df = pd.read_excel(io.BytesIO(f.read()), header=None)
-                    content = df.to_csv(index=False, encoding="utf-8")
-                elif ext == ".csv":
-                    content = f.read().decode("utf-8-sig", errors="replace")
-                else:
-                    content = f.read().decode("utf-8", errors="replace")
-            except Exception as e:
-                content = f"[读取失败: {str(e)}]"
-
-            user_msg = (
-                f"请从以下文件内容中提取电池产品的参数数据。\n{schema_text}\n"
-                "文件内容如下：\n" + content[:8000]
-            )
-            try:
-                text = _call_ai(provider, model, system_prompt, user_msg)
-                parsed = _extract_json_from_response(text)
-                results.update(parsed)
-            except Exception as e:
-                results[f"_error_{fname}"] = str(e)
-
-    return jsonify({"status": "success", "parsed": results, "provider": provider})
-
-
-@app.route("/api/ai/compliance_check", methods=["POST"])
-def ai_compliance_check():
-    """
-    Run EU Battery Regulation compliance pre-check on session inputs.
-    Returns missing/uncertain fields with priority levels.
-    """
-    data = request.json or {}
-    session_id = data.get("session_id")
-    provider = data.get("provider", "openai")
-    model = data.get("model", "gpt-4o")
-
-    if not session_id:
-        return jsonify({"status": "error", "message": "No session_id provided"}), 400
-
-    session_dir = os.path.join(RUNTIME_DIR, session_id)
-    draft_path = os.path.join(session_dir, "draft.json")
-    if not os.path.exists(draft_path):
-        return jsonify({"status": "error", "message": "Session not found"}), 404
-
-    with open(draft_path, encoding="utf-8") as f:
-        draft = json.load(f)
-
-    inputs = draft.get("inputs", {})
-
-    # Load field schema for labels
-    csv_path = os.path.join(CSV_VALUES_DIR, "01_手动输入.csv")
-    df = read_csv_auto(csv_path, header=2)
-    field_labels = {}
-    for _, row in df.iterrows():
-        fc = str(row.get("字段代码", "")).strip()
-        label = str(row.get("字段标签", fc)).strip()
-        category = str(row.get("字段分组", "")).strip()
-        if fc:
-            field_labels[fc] = {"label": label, "category": category}
-
-    # Build current inputs summary
-    inputs_summary = "\n".join([
-        f"- {fc}: {val} （{field_labels.get(fc, {}).get('label', fc)}）"
-        for fc, val in inputs.items() if val and str(val).strip()
-    ]) or "（暂无填写数据）"
-
-    system_prompt = (
-        "你是一个欧盟电池法规（EU Battery Regulation 2023/1542）合规审查专家。"
-        "你的任务是审查电池产品的碳足迹申报字段，找出缺失或不符合要求的数据。"
-        "根据EU Battery Regulation Annex II和Article 7的要求，判断哪些字段缺失、哪些值疑似错误。"
-        "以JSON格式返回审查结果："
-        '{"issues": [{"field": "字段代码", "label": "字段标签", "issue": "问题描述", "priority": "P1/P2/P3", "suggestion": "建议操作"}]}'
-        "P1 = 缺失会导致申报被拒绝的必填字段；P2 = 重要但可后续补充；P3 = 建议优化。"
-        "只报告你确信存在的问题，不要随意猜测。"
-    )
-
-    user_msg = (
-        "请审查以下电池产品的申报字段合规情况：\n\n"
-        f"当前已填写数据：\n{inputs_summary}\n\n"
-        "请对照EU Battery Regulation要求，识别缺失或不符合规范的数据项。"
-    )
-
-    try:
-        text = _call_ai(provider, model, system_prompt, user_msg)
-        issues = _extract_json_from_response(text).get("issues", [])
-        return jsonify({"status": "success", "issues": issues, "provider": provider})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
-def _extract_json_from_response(text):
-    """Try to extract JSON from AI response text."""
-    import re
-    text = text.strip()
-    # Try direct JSON parse first
-    try:
-        return json.loads(text)
-    except Exception:
-        pass
-    # Try to find JSON in markdown code blocks
-    match = re.search(r"```(?:json)?\s*([\s\S]+?)\s*```", text)
-    if match:
-        try:
-            return json.loads(match.group(1).strip())
-        except Exception:
-            pass
-    # Try to find {...} pattern
-    match = re.search(r"\{[\s\S]+\}", text)
-    if match:
-        try:
-            return json.loads(match.group(0))
-        except Exception:
-            pass
-    return {}
 
 
 # ============================================================
@@ -677,9 +348,6 @@ def _try_excel_recalc(session_dir, inputs, session_id):
     wb_path = os.path.join(session_dir, "workbook.xlsx")
     if not os.path.exists(wb_path):
         return "workbook_not_found"
-
-    if not COM_AVAILABLE:
-        return "com_unavailable"
 
     pythoncom.CoInitialize()
     excel = None
@@ -1029,10 +697,10 @@ def health():
 
 
 if __name__ == "__main__":
-    import sys
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 5001
+    port = int(os.environ.get("PORT", "5000"))
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
     print("=" * 60)
-    print("CATL Four-Layer Mapping Engine - Product Site v2 (AI)")
+    print("CATL Four-Layer Mapping Engine - Product Site v2")
     print("=" * 60)
     print(f"COM available: {COM_AVAILABLE}")
     print(f"Template:      {TEMPLATE_XLSX}")
@@ -1043,4 +711,4 @@ if __name__ == "__main__":
     print("=" * 60)
     print(f"Starting Flask on http://127.0.0.1:{port}")
     print("=" * 60)
-    app.run(debug=True, port=port, host="0.0.0.0")
+    app.run(debug=debug, port=port, host="0.0.0.0")

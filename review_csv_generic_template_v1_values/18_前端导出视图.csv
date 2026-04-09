@@ -1,0 +1,54 @@
+﻿前端导出视图：后续做网页、API、JSON 最推荐直接读取这一张,,,,,,,,,,
+它把 EU 输出和 CBAM 输出都拉平成一张结构化表，前端同学不用再去跨多张表拼数据。,,,,,,,,,,
+场景,模块,输出字段,单位,当前值,证据状态,核验层级,访问层级,当前状态,来源Sheet,原行号
+EU Battery Regulation,基本信息,制造商名称,文本,CATL,证据齐备,内部确认,公开,已生成,02_欧盟电池法输出,4
+EU Battery Regulation,基本信息,产品名称,文本,CATL 通用电池产品模板（Generic Example）,证据齐备,内部确认,公开,已生成,02_欧盟电池法输出,5
+EU Battery Regulation,基本信息,电池型号,文本,GENERIC-BATTERY-MODEL-001,证据齐备,内部确认,受限,已生成,02_欧盟电池法输出,6
+EU Battery Regulation,基本信息,产品类别,文本,EV battery / ESS battery / special application,证据齐备,内部确认,公开,已生成,02_欧盟电池法输出,7
+EU Battery Regulation,基本信息,化学体系,文本,LFP / LMFP / NMC（模板示例）,证据齐备,内部确认,公开,已生成,02_欧盟电池法输出,8
+EU Battery Regulation,基本信息,制造工厂代码,文本,CN-PLANT-TEMPLATE-001,证据齐备,内部确认,受限,已生成,02_欧盟电池法输出,9
+EU Battery Regulation,基本信息,制造工厂名称,文本,某制造工厂（模板）,证据齐备,内部确认,受限,已生成,02_欧盟电池法输出,10
+EU Battery Regulation,基本信息,报告期,文本,2026Q1,证据齐备,内部确认,受限,已生成,02_欧盟电池法输出,11
+EU Battery Regulation,产品参数,申报单元申报单元额定容量(kWh),kWh,72,证据齐备,测试+内部确认,公开,已生成,02_欧盟电池法输出,12
+EU Battery Regulation,产品参数,标称电压(V),V,800,证据齐备,测试+内部确认,公开,已生成,02_欧盟电池法输出,13
+EU Battery Regulation,产品参数,循环寿命(cycles),cycles,4000,证据齐备,测试+内部确认,公开,已生成,02_欧盟电池法输出,14
+EU Battery Regulation,碳足迹,声明总碳足迹(kgCO2e/申报单元),kgCO2e/declared unit,3525.957446808511,证据齐备,第三方/合规核验,公开,已生成,02_欧盟电池法输出,15
+EU Battery Regulation,碳足迹,声明总碳足迹(kgCO2e/kWh),kgCO2e/kWh,48.97163120567376,证据齐备,第三方/合规核验,公开,已生成,02_欧盟电池法输出,16
+EU Battery Regulation,碳足迹,原材料阶段(kgCO2e/kWh),kgCO2e/kWh,44.23611111111111,证据齐备,第三方/合规核验,受限,已生成,02_欧盟电池法输出,17
+EU Battery Regulation,碳足迹,制造阶段(kgCO2e/kWh),kgCO2e/kWh,4.360520094562649,证据齐备,第三方/合规核验,受限,已生成,02_欧盟电池法输出,18
+EU Battery Regulation,碳足迹,运输阶段(kgCO2e/kWh),kgCO2e/kWh,0.5833333333333334,证据齐备,第三方/合规核验,受限,已生成,02_欧盟电池法输出,19
+EU Battery Regulation,碳足迹,终端回收阶段(kgCO2e/kWh),kgCO2e/kWh,-0.2083333333333333,证据齐备,第三方/合规核验,受限,已生成,02_欧盟电池法输出,20
+EU Battery Regulation,再生材料,再生锂占比,%,0.08,证据齐备,第三方/合规核验,公开,已生成,02_欧盟电池法输出,21
+EU Battery Regulation,再生材料,再生钴占比,%,0,证据齐备,第三方/合规核验,公开,已生成,02_欧盟电池法输出,22
+EU Battery Regulation,再生材料,再生镍占比,%,0,证据齐备,第三方/合规核验,公开,已生成,02_欧盟电池法输出,23
+EU Battery Regulation,再生材料,再生铅占比,%,0,证据齐备,第三方/合规核验,公开,已生成,02_欧盟电池法输出,24
+EU Battery Regulation,尽调与追溯,尽调政策链接,文本,https://www.catl.com/,证据齐备,法务/内部确认,公开,已生成,02_欧盟电池法输出,25
+EU Battery Regulation,尽调与追溯,关键原材料追溯范围,文本,lithium / graphite / aluminium / copper / steel,证据齐备,内部确认,公开,已生成,02_欧盟电池法输出,26
+EU Battery Regulation,尽调与追溯,供应链追溯覆盖率,%,0.92,证据齐备,内部确认 + 抽样复核,受限,已生成,02_欧盟电池法输出,27
+EU Battery Regulation,文件与护照,产品碳足迹研究底稿状态,文本,齐备,证据齐备,内部确认,内部,已生成,02_欧盟电池法输出,28
+EU Battery Regulation,文件与护照,测试报告状态,文本,齐备,证据齐备,内部确认,内部,已生成,02_欧盟电池法输出,29
+EU Battery Regulation,文件与护照,技术文档状态,文本,齐备,证据齐备,内部确认,内部,已生成,02_欧盟电池法输出,30
+EU Battery Regulation,文件与护照,护照对象 ID,文本,passport-demo-001,证据齐备,内部确认,受限,已生成,02_欧盟电池法输出,31
+EU Battery Regulation,文件与护照,个体电池编码前缀,文本,SXP25Q4,证据齐备,内部确认,受限,已生成,02_欧盟电池法输出,32
+EU Battery Regulation,综合状态,EU 输出完备度,%,1,证据齐备,系统自动判定 + PMO复核,内部,已生成,02_欧盟电池法输出,33
+EU Battery Regulation,综合状态,EU 输出结论,文本,可作为通用模板示例输出,证据齐备,系统自动判定 + 管理层复核,公开,已生成,02_欧盟电池法输出,34
+CBAM Shadow Output,基础锚点,电池型号,文本,GENERIC-BATTERY-MODEL-001,证据齐备,内部确认,受限,已生成,03_CBAM输出,4
+CBAM Shadow Output,基础锚点,产品报告期,文本,2026Q1,证据齐备,内部确认,受限,已生成,03_CBAM输出,5
+CBAM Shadow Output,基础锚点,上游材料报告期,文本,2025Q4,证据齐备,内部确认,受限,已生成,03_CBAM输出,6
+CBAM Shadow Output,铝材模块,铝材供应商安装点 ID,文本,AL-SUP-001,证据齐备,供应商确认 + 内部复核,高度受限,已生成,03_CBAM输出,7
+CBAM Shadow Output,铝材模块,铝材质量(kg),kg,80,证据齐备,内部确认,受限,已生成,03_CBAM输出,8
+CBAM Shadow Output,铝材模块,铝材直接排放因子(kgCO2e/kg),kgCO2e/kg,9,证据齐备,供应商核验 + 合规复核,高度受限,已生成,03_CBAM输出,9
+CBAM Shadow Output,铝材模块,铝材间接排放因子(kgCO2e/kg),kgCO2e/kg,5,证据齐备,供应商核验 + 合规复核,高度受限,已生成,03_CBAM输出,10
+CBAM Shadow Output,铝材模块,铝材总嵌入排放(kgCO2e/申报单元),kgCO2e/declared unit,1120,证据齐备,供应商核验 + 合规复核,受限,已生成,03_CBAM输出,11
+CBAM Shadow Output,铝材模块,铝材核验状态,文本,已核验,证据齐备,供应商核验 + 内部确认,内部,已生成,03_CBAM输出,12
+CBAM Shadow Output,钢材模块,钢材供应商安装点 ID,文本,ST-SUP-001,证据齐备,供应商确认 + 内部复核,高度受限,已生成,03_CBAM输出,13
+CBAM Shadow Output,钢材模块,钢材质量(kg),kg,30,证据齐备,内部确认,受限,已生成,03_CBAM输出,14
+CBAM Shadow Output,钢材模块,钢材直接排放因子(kgCO2e/kg),kgCO2e/kg,2,证据齐备,供应商核验 + 合规复核,高度受限,已生成,03_CBAM输出,15
+CBAM Shadow Output,钢材模块,钢材间接排放因子(kgCO2e/kg),kgCO2e/kg,0.7,证据齐备,供应商核验 + 合规复核,高度受限,已生成,03_CBAM输出,16
+CBAM Shadow Output,钢材模块,钢材总嵌入排放(kgCO2e/申报单元),kgCO2e/declared unit,81,证据齐备,供应商核验 + 合规复核,受限,已生成,03_CBAM输出,17
+CBAM Shadow Output,钢材模块,钢材核验状态,文本,已核验,证据齐备,供应商核验 + 内部确认,内部,已生成,03_CBAM输出,18
+CBAM Shadow Output,汇总,覆盖材料总嵌入排放(kgCO2e/申报单元),kgCO2e/declared unit,1201,证据齐备,合规复核,受限,已生成,03_CBAM输出,19
+CBAM Shadow Output,汇总,覆盖材料占整包总排放比重,%,0.3406167028723148,证据齐备,合规复核,受限,已生成,03_CBAM输出,20
+CBAM Shadow Output,汇总,供应商 PCF 覆盖率,%,0.76,证据齐备,内部确认 + 抽样复核,内部,已生成,03_CBAM输出,21
+CBAM Shadow Output,综合状态,CBAM 兼容输出完备度,%,1,证据齐备,系统自动判定 + PMO复核,内部,已生成,03_CBAM输出,22
+CBAM Shadow Output,综合状态,CBAM 兼容输出结论,文本,可作为上游碳数据通用兼容模块示例,证据齐备,系统自动判定 + 管理层复核,公开,已生成,03_CBAM输出,23
